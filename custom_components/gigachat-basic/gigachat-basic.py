@@ -10,6 +10,7 @@ class CustomComponent(Component):
     documentation: str = "https://docs.langflow.org/components-custom-components"
     icon = "code"
     name = "CustomComponent"
+    
 
     inputs = [
         MessageTextInput(
@@ -22,7 +23,11 @@ class CustomComponent(Component):
     ]
 
     outputs = [
-        Output(display_name="Output", name="output", method="build_output"),
+        Output(
+                display_name="Output",
+                name="output",
+                method="build_output"
+            ),
     ]
 
     def build_output(self) -> Data:

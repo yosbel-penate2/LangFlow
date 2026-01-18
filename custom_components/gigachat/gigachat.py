@@ -11,6 +11,7 @@ from lfx.inputs.inputs import (
     SecretStrInput,
     SliderInput,
     BoolInput,
+
 )
 
 GIGACHAT_MODELS = [
@@ -18,7 +19,6 @@ GIGACHAT_MODELS = [
     "GigaChat-Pro",
     "GigaChat-Max",
 ]
-
 
 class GigaChatModelComponent(LCModelComponent):
     display_name = "GigaChat"
@@ -64,7 +64,7 @@ class GigaChatModelComponent(LCModelComponent):
             display_name="Verify SSL Certificates",
             value=False,
             advanced=True,
-        ),
+        )
     ]
 
     def build_model(self) -> LanguageModel:

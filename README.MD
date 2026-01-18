@@ -1,3 +1,5 @@
+.venv\Scripts\activate.bat
+
 uv run langflow run
 
 Problema: Componente no aparece
