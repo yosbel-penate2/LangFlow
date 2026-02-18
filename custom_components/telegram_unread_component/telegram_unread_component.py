@@ -6,7 +6,7 @@ from typing import Any, Optional, List, Dict
 from concurrent.futures import ThreadPoolExecutor, TimeoutError
 from telethon import TelegramClient
 from telethon.errors import (
-    SessionPasswordNeededError, 
+    SessionPasswordNeededError,
     PhoneNumberInvalidError,
     FloodWaitError,
     RPCError
@@ -25,7 +25,7 @@ from lfx.log.logger import logger
 
 class TelegramUnreadMessages(Component):
     display_name = "Telegram Unread Messages"
-    description = "Fetches unread messages from Telegram using session string."
+    description = "Fetches unread messages from one contact from Telegram using session string."
     icon = "message-circle"
     name = "TelegramUnreadMessages"
 
@@ -98,19 +98,19 @@ class TelegramUnreadMessages(Component):
         Método principal con manejo CORRECTO de event loop.
         """
         start_time = time.time()
-        
+
         # Validar session string
         if not self.session_string or len(self.session_string.strip()) < 10:
             self.status = "❌ Session string inválido o muy corto"
             return []
-        
+
         # Crear un nuevo event loop para esta operación
         loop = None
         try:
             # Crear loop completamente nuevo
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
-            
+
             # Ejecutar la tarea con timeout
             messages = loop.run_until_complete(
                 asyncio.wait_for(
@@ -118,7 +118,7 @@ class TelegramUnreadMessages(Component):
                     timeout=self.timeout_seconds
                 )
             )
-            
+
             # Crear objetos Data
             data_objects = []
             for msg_data in messages:
@@ -133,11 +133,11 @@ class TelegramUnreadMessages(Component):
                     }
                 )
                 data_objects.append(data_obj)
-            
+
             elapsed = time.time() - start_time
             self.status = f"✅ {len(data_objects)} mensajes en {elapsed:.1f}s"
             return data_objects
-            
+
         except asyncio.TimeoutError:
             self.status = f"⏱️ Timeout después de {self.timeout_seconds}s"
             return []
@@ -163,11 +163,11 @@ class TelegramUnreadMessages(Component):
         Versión asíncrona con manejo robusto.
         """
         client = None
-        
+
         try:
             # Limpiar el session string
             session_str = self.session_string.strip()
-            
+
             # Crear StringSession
             try:
                 session = StringSession(session_str)
@@ -175,7 +175,7 @@ class TelegramUnreadMessages(Component):
             except Exception as e:
                 logger.error(f"Error al crear StringSession: {e}")
                 raise ValueError(f"Session string inválido: {e}")
-            
+
             # Crear cliente
             client = TelegramClient(
                 session=session,
@@ -185,50 +185,50 @@ class TelegramUnreadMessages(Component):
                 request_retries=2,
                 connection_retries=2,
             )
-            
+
             # Conectar
             try:
                 await asyncio.wait_for(client.connect(), timeout=10)
             except asyncio.TimeoutError:
                 raise TimeoutError("No se puede conectar a Telegram")
-            
+
             # Verificar autorización
             if not await client.is_user_authorized():
                 raise ValueError("Session string no autorizado - genera uno nuevo")
-            
+
             # Obtener entidad del chat
             entity = await self._get_chat_entity(client)
             if not entity:
                 raise ValueError(f"Chat '{self.chat_identifier}' no encontrado")
-            
+
             # Obtener mensajes
             messages = await asyncio.wait_for(
                 client.get_messages(entity, limit=self.limit),
                 timeout=10
             )
-            
+
             # Obtener diálogos para read_inbox_max_id
             dialogs = await asyncio.wait_for(
                 client.get_dialogs(),
                 timeout=10
             )
-            
+
             # Encontrar diálogo correcto
             target_dialog = next(
                 (d for d in dialogs if d.entity.id == entity.id),
                 None
             )
-            
+
             # Filtrar mensajes no leídos
             read_max_id = target_dialog.dialog.read_inbox_max_id if target_dialog else 0
             unread_messages = []
-            
+
             for msg in messages:
-                if (not msg.out and 
-                    msg.id > read_max_id and 
-                    msg.text and 
+                if (not msg.out and
+                    msg.id > read_max_id and
+                    msg.text and
                     msg.text.strip()):
-                    
+
                     unread_messages.append({
                         "id": msg.id,
                         "text": msg.text,
@@ -237,14 +237,14 @@ class TelegramUnreadMessages(Component):
                         "chat_id": entity.id,
                         "chat_name": self._get_chat_name(entity),
                     })
-            
+
             # Marcar como leídos
             if self.mark_as_read and unread_messages and target_dialog:
                 last_id = max(msg["id"] for msg in unread_messages)
                 await client.send_read_acknowledge(entity, max_id=last_id)
-            
+
             return unread_messages[:self.max_unread]
-            
+
         except FloodWaitError as e:
             raise ValueError(f"Flood wait: {e.seconds}s")
         except Exception as e:
@@ -263,7 +263,7 @@ class TelegramUnreadMessages(Component):
         identifier = self.chat_identifier.strip()
         if identifier.startswith('@'):
             identifier = identifier[1:]
-        
+
         try:
             return await client.get_entity(identifier)
         except:
