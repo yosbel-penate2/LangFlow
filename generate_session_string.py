@@ -1,9 +1,22 @@
 from telethon.sync import TelegramClient
 from telethon.sessions import StringSession
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 # Tus credenciales de https://my.telegram.org
-API_ID = 3670950  # Reemplaza con tu API ID (número)
-API_HASH = '7b8e672da86cf2d4d05c63ddfdbc1a66'  # Reemplaza con tu API Hash
+API_ID = os.getenv('API_ID')  # Reemplaza con tu API ID (número)
+API_HASH = os.getenv('API_HASH')  # Reemplaza con tu API Hash
+
+if not API_ID or not API_HASH:
+    raise ValueError("❌ Faltan API_ID o API_HASH en el archivo .env")
+
+# Convertir API_ID a entero
+try:
+    API_ID = int(API_ID)
+except ValueError:
+    raise ValueError("❌ API_ID debe ser un número entero")
 
 print("=== GENERADOR DE STRING SESSION PARA TELEGRAM ===")
 print("1. Te pedirá tu número de teléfono")
