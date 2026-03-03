@@ -5,6 +5,7 @@ from telethon import TelegramClient
 from telethon.errors import FloodWaitError
 from telethon.sessions import StringSession
 import nest_asyncio
+from langflow.schema import DataFrame as LangflowDataFrame  # ✅ Usar el DataFrame de langflow.schema
 import pandas as pd
 
 
@@ -384,18 +385,36 @@ class TelegramMultiChatReader(Component):
             return f"{entity.first_name} {last}".strip()
         return str(entity.id)
 
-    def get_messages_by_chat(self) -> Dict[str, List[Data]]:
-        """Agrupa mensajes por chat"""
+    def get_messages_by_chat(self) -> LangflowDataFrame:
+        """Agrupa mensajes por chat y devuelve un DataFrame compatible con Langflow (langflow.schema.DataFrame)"""
         if self._last_results:
             messages = self._last_results
         else:
             messages = self.get_all_messages()
 
-        result = {}
+        # Convertir lista de objetos Data a filas
+        rows = []
         for msg in messages:
-            chat_name = msg.data.get("chat_name", "unknown")
-            if chat_name not in result:
-                result[chat_name] = []
-            result[chat_name].append(msg)
+            row = {
+                "chat_name": msg.data.get("chat_name", "unknown"),
+                "message_id": msg.data.get("message_id"),
+                "date": msg.data.get("date"),
+                "sender_id": msg.data.get("sender_id"),
+                "chat_id": msg.data.get("chat_id"),
+                "chat_identifier": msg.data.get("chat_identifier"),
+                "is_unread": msg.data.get("is_unread"),
+                "outgoing": msg.data.get("outgoing"),
+                "text": msg.text
+            }
+            rows.append(row)
 
-        return result
+        # Crear DataFrame de pandas
+        pd_df = pd.DataFrame(rows) if rows else pd.DataFrame(
+            columns=[
+                "chat_name", "message_id", "date", "sender_id",
+                "chat_id", "chat_identifier", "is_unread", "outgoing", "text"
+            ]
+        )
+
+        # ✅ Devolver como langflow.schema.DataFrame (wrapper correcto para Langflow)
+        return LangflowDataFrame(pd_df)
