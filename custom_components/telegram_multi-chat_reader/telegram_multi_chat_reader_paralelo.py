@@ -5,6 +5,8 @@ from telethon import TelegramClient
 from telethon.errors import FloodWaitError
 from telethon.sessions import StringSession
 import nest_asyncio
+import pandas as pd
+
 
 # Aplicar nest_asyncio
 nest_asyncio.apply()
