@@ -5,7 +5,7 @@ from telethon import TelegramClient
 from telethon.errors import FloodWaitError
 from telethon.sessions import StringSession
 import nest_asyncio
-from langflow.schema import DataFrame as LangflowDataFrame  # ✅ Usar el DataFrame de langflow.schema
+from langflow.schema import DataFrame  # ✅ Usar el DataFrame de langflow.schema
 import pandas as pd
 
 
@@ -385,7 +385,7 @@ class TelegramMultiChatReader(Component):
             return f"{entity.first_name} {last}".strip()
         return str(entity.id)
 
-    def get_messages_by_chat(self) -> LangflowDataFrame:
+    def get_messages_by_chat(self) -> DataFrame:
         """Agrupa mensajes por chat y devuelve un DataFrame compatible con Langflow (langflow.schema.DataFrame)"""
         if self._last_results:
             messages = self._last_results
@@ -417,4 +417,4 @@ class TelegramMultiChatReader(Component):
         )
 
         # ✅ Devolver como langflow.schema.DataFrame (wrapper correcto para Langflow)
-        return LangflowDataFrame(pd_df)
+        return DataFrame(pd_df)
