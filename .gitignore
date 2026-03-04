@@ -130,3 +130,7 @@ gigaide.properties
 session.txt
 .idea\
 chroma_langflow\
+.chroma/
+chroma_db/
+
+secrets.json
