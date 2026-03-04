@@ -128,8 +128,8 @@ temp/
 telegram_session_temp.session
 gigaide.properties
 session.txt
-.idea\
-chroma_langflow\
+
+chroma_langflow/
 .chroma/
 chroma_db/
 
