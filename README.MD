@@ -204,6 +204,11 @@ export LANGFLOW_COMPONENTS_PATH=/ruta/a/tus/componentes
 langflow run --log-level debug
 ```
 
+### Run langflow 
+
+```bash
+uv run langflow run
+```
 ---
 
 ## ⚠️ Seguridad / Security / Безопасность
